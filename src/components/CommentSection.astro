@@ -37,103 +37,74 @@ import DeleteModal from './DeleteModal.astro';
 <script>
 import { createGetCollection } from "astro/content/runtime"
 
-	var commentsData = {
-		"currentUser": {
-			"image": { 
-				"png": "/avatars/image-juliusomo.png",
-				"webp": "/avatars/image-juliusomo.webp"
-			},
-			"username": "juliusomo"
-		},
-		"comments": [
-			{
-				"id": 1,
-				"content": "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
-				"createdAt": "1 month ago",
-				"score": 12,
-				"user": {
-					"image": { 
-						"png": "/avatars/image-amyrobson.png",
-						"webp": "/avatars/image-amyrobson.webp"
-					},
-					"username": "amyrobson"
-				},
-				"replies": []
-			},
-			{
-				"id": 2,
-				"content": "Woah, your project looks awesome! How long have you been coding for? id'm still new, but think id want to dive into React as well soon. Perhaps you can give me an insight on where id can learn React? Thanks!",
-				"createdAt": "2 weeks ago",
-				"score": 5,
-				"user": {
-					"image": { 
-						"png": "/avatars/image-maxblagun.png",
-						"webp": "/avatars/image-maxblagun.webp"
-					},
-					"username": "maxblagun"
-				},
-				"replies": [
-					{
-						"id": 3,
-						"content": "If you're still new, i'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. It's very tempting to jump ahead but lay a solid foundation first.",
-						"createdAt": "1 week ago",
-						"score": 4,
-						"replyingTo": "maxblagun",
-						"user": {
-							"image": { 
-								"png": "/avatars/image-ramsesmiron.png",
-								"webp": "/avatars/image-ramsesmiron.webp"
-							},
-							"username": "ramsesmiron"
-						}
-					},
-					{
-						"id": 4,
-						"content": "I couldn't agree more with this. Everything moves so fast and it always seems like everyone knows the newest library/framework. But the fundamentals are what stay constant.",
-						"createdAt": "2 days ago",
-						"score": 2,
-						"replyingTo": "ramsesmiron",
-						"user": {
-							"image": { 
-								"png": "/avatars/image-juliusomo.png",
-								"webp": "/avatars/image-juliusomo.webp"
-							},
-							"username": "juliusomo"
-							}
-						}
-					]
-				},
+var commentsData = {
+  "currentUser": {
+    "image": { 
+      "png": "/avatars/image-juliusomo.png",
+      "webp": "/avatars/image-juliusomo.webp"
+    },
+    "username": "juliusomo"
+  },
+  "comments": [
+    {
+      "id": 1,
+      "content": "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
+      "createdAt": "1 month ago",
+      "score": 12,
+      "user": {
+        "image": { 
+          "png": "/avatars/image-amyrobson.png",
+          "webp": "/avatars/image-amyrobson.webp"
+        },
+        "username": "amyrobson"
+      },
+      "replies": []
+    },
+    {
+      "id": 2,
+      "content": "Woah, your project looks awesome! How long have you been coding for? I'm still new, but think I want to dive into React as well soon. Perhaps you can give me an insight on where I can learn React? Thanks!",
+      "createdAt": "2 weeks ago",
+      "score": 5,
+      "user": {
+        "image": { 
+          "png": "/avatars/image-maxblagun.png",
+          "webp": "/avatars/image-maxblagun.webp"
+        },
+        "username": "maxblagun"
+      },
+      "replies": [
         {
-				"id": 5,
-				"content": "This is a comment that was made by me. Just for testing purposes",
-				"createdAt": "1 week ago",
-				"score": 7,
-				"user": {
-					"image": { 
-						"png": "/avatars/image-amyrobson.png",
-						"webp": "/avatars/image-amyrobson.webp"
-					},
-					"username": "juliusomo"
-				},
-				"replies": [
-					{
-						"id": 6,
-						"content": "Some random text to show that this reply is unique",
-						"createdAt": "1 week ago",
-						"score": 4,
-						"replyingTo": "juliusomo",
-						"user": {
-							"image": { 
-								"png": "/avatars/image-ramsesmiron.png",
-								"webp": "/avatars/image-ramsesmiron.webp"
-							},
-							"username": "ramsesmiron"
-						}
-					},
-				]
-			},
-			]
-		}
+          "id": 3,
+          "content": "If you're still new, I'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. It's very tempting to jump ahead but lay a solid foundation first.",
+          "createdAt": "1 week ago",
+          "score": 4,
+          "replyingTo": "maxblagun",
+          "user": {
+            "image": { 
+              "png": "/avatars/image-ramsesmiron.png",
+              "webp": "/avatars/image-ramsesmiron.webp"
+            },
+            "username": "ramsesmiron"
+          }
+        },
+        {
+          "id": 4,
+          "content": "I couldn't agree more with this. Everything moves so fast and it always seems like everyone knows the newest library/framework. But the fundamentals are what stay constant.",
+          "createdAt": "2 days ago",
+          "score": 2,
+          "replyingTo": "ramsesmiron",
+          "user": {
+            "image": { 
+              "png": "/avatars/image-juliusomo.png",
+              "webp": "/avatars/image-juliusomo.webp"
+            },
+            "username": "juliusomo"
+          }
+        }
+      ]
+    }
+  ]
+}
 
     const commentSection = document.querySelector(".comment-section")
     const commentTemplate = document.querySelector(".comment")
@@ -194,7 +165,7 @@ import { createGetCollection } from "astro/content/runtime"
             const reply = document.createElement("div")
             reply.classList.add("replies")
             reply.innerHTML = replies.outerHTML
-            newCommentContent.parentElement.appendChild(reply)
+            newCommentWrapper.parentElement.appendChild(reply)
             const repliesContent = reply.querySelector(".replies")
 
             const newReplyComment = document.createElement("div")
@@ -223,7 +194,10 @@ import { createGetCollection } from "astro/content/runtime"
 
             const iconDelete = newReplyComment.querySelector(".icon-delete")
             iconDelete.addEventListener("click", () => {
-
+              newReplyComment.style.animation = "fadeOut 400ms forwards"
+              newReplyComment.addEventListener("animationend", () => {
+                newReplyComment.remove()
+              })
             })
 
             const iconEdit = newReplyComment.querySelector(".icon-edit")
@@ -248,6 +222,7 @@ import { createGetCollection } from "astro/content/runtime"
             newReplyContent.setAttribute("aria-details", "user-comment")
             newReplyContent.setAttribute("aria-owns", "reply")
             replyInput.remove()
+            replyContent.value = ""
           }
         })
       })
@@ -268,6 +243,12 @@ import { createGetCollection } from "astro/content/runtime"
         newCommentWrapper.setAttribute("aria-details", "user-comment")
 
         const iconDelete = newComment.querySelector(".icon-delete")
+        iconDelete.addEventListener("click", () => {
+          newComment.style.animation = "fadeOut 400ms forwards"
+          newComment.addEventListener("animationend", () => {
+            newComment.remove()
+          })
+        })
 
         const iconEdit = newComment.querySelector(".icon-edit")
         iconEdit.addEventListener("click", () => {
@@ -349,6 +330,12 @@ import { createGetCollection } from "astro/content/runtime"
                 content.textContent = replyContent.value
 
                 const iconDelete = newReplyContent.querySelector(".icon-delete")
+                iconDelete.addEventListener("click", () => {
+                  newReply.style.animation = "fadeOut 400ms forwards"
+                  newReply.addEventListener("animationend", () => {
+                    newReply.remove()
+                  })
+                })
 
                 const iconEdit = newReplyContent.querySelector(".icon-edit")
                 iconEdit.addEventListener("click", () => {
@@ -395,6 +382,12 @@ import { createGetCollection } from "astro/content/runtime"
             newCommentContent.setAttribute("aria-details", "user-comment")
 
             const iconDelete = newComment.querySelector(".icon-delete")
+            iconDelete.addEventListener("click", () => {
+              newComment.style.animation = "fadeOut 400ms forwards"
+              newComment.addEventListener("animationend", () => {
+                newComment.remove()
+              })
+            })
 
             const iconEdit = newComment.querySelector(".icon-edit")
             iconEdit.addEventListener("click", () => {
@@ -433,9 +426,9 @@ import { createGetCollection } from "astro/content/runtime"
     userAvatar.src = commentsData.currentUser.image.webp
 
     sendBtn.addEventListener("click", () => {
-      var userCommentInput = commentInput.value
+      var userCommentInput = commentInput
 
-      if (userCommentInput != "") {
+      if (userCommentInput.value != "") {
         var newComment = document.createElement("div");
         newComment.innerHTML = commentTemplate.outerHTML;
         commentSection.appendChild(newComment);
@@ -454,7 +447,7 @@ import { createGetCollection } from "astro/content/runtime"
         createdAt.textContent = "A few seconds ago"
   
         const content = newCommentContent.querySelector(".comment-content") as HTMLElement
-        content.textContent = userCommentInput
+        content.textContent = userCommentInput.value
   
         const increaseScore = newComment.querySelector(".increase-score")
         increaseScore.addEventListener("click", () => {
@@ -469,6 +462,12 @@ import { createGetCollection } from "astro/content/runtime"
         })
 
         const iconDelete = newComment.querySelector(".icon-delete")
+        iconDelete.addEventListener("click", () => {
+          newComment.style.animation = "fadeOut 400ms forwards"
+          newComment.addEventListener("animationend", () => {
+            newComment.remove()
+          })
+        })
 
         const iconEdit = newComment.querySelector(".icon-edit")
         iconEdit.addEventListener("click", () => {
@@ -490,7 +489,7 @@ import { createGetCollection } from "astro/content/runtime"
   
         newCommentContent.setAttribute("aria-details", "user-comment")
 
-        commentInput.value = ""
+        userCommentInput.value = ""
       }
     })
 </script>
