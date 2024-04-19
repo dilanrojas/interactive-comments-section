@@ -1,0 +1,56 @@
+<div class="comment-box">
+  <div class="avatar-wrapper">
+    <img class="user-avatar" src="" alt="Imagen de tu avatar">
+  </div>
+  <div class="comment-input-wrapper">
+    <textarea
+      name="comment-textarea"
+      class="user-comment-input"
+      placeholder="Add a comment..."
+      spellcheck="false"
+      ></textarea>
+  </div>
+  <div class="send-wrapper">
+    <button class="button send-btn">Send</button>
+  </div>
+</div>
+
+<style>
+  .comment-box {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1em;
+    padding: 1.3rem;
+    background-color: var(--white);
+    border-radius: var(--rounded-10);
+    box-shadow: 0px 0px 10px rgb(0, 0, 0, .03);
+  }
+
+  textarea[class="user-comment-input"] {
+    padding: .8em 1.6em;
+    border: 0;
+    resize: none;
+    outline: 1px solid var(--light-gray-blue);
+    border-radius: var(--rounded-5);
+    color: var(--dark-blue);
+    width: 100%;
+    min-height: 5.5em;
+    scrollbar-width: thin;
+  }
+
+  @media(width <= 660px) {
+    .comment-input-wrapper {
+      grid-column: span 2;
+    }
+
+    .avatar-wrapper {
+      grid-row: 2;
+    }
+
+    .send-wrapper {
+      grid-row: 2;
+      margin-left: auto;
+    }
+  }
+
+</style>
