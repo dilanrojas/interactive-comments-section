@@ -273,12 +273,14 @@ import DeleteModal from './DeleteModal.astro';
 
         const updateBtn = editComment.querySelector(".update-btn")
         updateBtn.addEventListener("click", () => {
-          commentContent.textContent = editInput.value
-          commentReplyTo.style.display = "inline"
-          commentReplyTo.style.animation = "loading 700ms forwards"
-          commentContent.style.display = "inline"
-          commentContent.style.animation = "loading 700ms forwards"
-          editComment.style.display = "none"
+          if (editInput.value != "") {
+            commentContent.textContent = editInput.value
+            commentReplyTo.style.display = "inline"
+            commentReplyTo.style.animation = "loading 900ms forwards"
+            commentContent.style.display = "inline"
+            commentContent.style.animation = "loading 900ms forwards"
+            editComment.style.display = "none"
+          }
         })
       })
     } else {
