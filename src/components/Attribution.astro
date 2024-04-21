@@ -1,0 +1,32 @@
+<div class="attribution">
+  Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+  Coded by <a href="https://github.com/dilanrojas" target="_blank">Dilan Rojas</a>.
+</div>
+
+<style>
+  .attribution {
+    text-align: center;
+    justify-self: center;
+    bottom: 0;
+    margin-top: 2em;
+    opacity: .8;
+  }
+  .attribution a {
+    display: inline-block;
+    color: var(--soft-red);
+    font-weight: var(--fw-semibold);
+  }
+
+  .attribution a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 1.3px;
+    background: var(--soft-red);
+    transition: width .3s;
+  }
+
+  .attribution a:hover::after {
+    width: 100%;
+  }
+</style>
