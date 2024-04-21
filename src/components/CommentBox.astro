@@ -32,10 +32,15 @@
     resize: none;
     outline: 1px solid var(--light-gray-blue);
     border-radius: var(--rounded-5);
-    color: var(--dark-blue);
+    color: var(--gary-blue);
     width: 100%;
     min-height: 5.5em;
     scrollbar-width: thin;
+    transition: outline .08s ease;
+  }
+
+  textarea[class="user-comment-input"]:focus {
+    outline: 1px solid var(--dark-blue);
   }
 
   @media(width <= 660px) {

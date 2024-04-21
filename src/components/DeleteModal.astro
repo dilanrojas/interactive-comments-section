@@ -1,4 +1,4 @@
-<div class="delete-modal-wrapper">
+<div class="delete-modal">
   <div class="delete-modal-card container">
     <h1>Delete comment</h1>
     <p>
@@ -17,18 +17,18 @@
 </div>
 
 <style>
-  .delete-modal-wrapper {
+  .delete-modal {
     display: none;
     align-items: center;
     justify-content: center;
     background-color: rgb(0, 0, 0, .3);
     position: fixed;
     inset: 0;
-    animation: fadeIn 400ms forwards;
+    animation: fadeIn 300ms forwards;
   }
 
-  .delete-modal-wrapper[closing] {
-    animation: fadeOut 400ms forwards
+  .delete-modal[closing] {
+    animation: fadeOut 300ms forwards
   }
 
   .delete-modal-card {

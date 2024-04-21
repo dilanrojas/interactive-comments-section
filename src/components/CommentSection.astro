@@ -5,7 +5,7 @@ import Replies from "./Replies.astro";
 import DeleteModal from './DeleteModal.astro';
 ---
 
-<section class="container">
+<section class="container comments">
 
   <div class="comment-section">
     <Comment />
@@ -21,475 +21,341 @@ import DeleteModal from './DeleteModal.astro';
 </section>
 
 <style>
-  .container {
+  .comments {
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: .5em;
   }
 
   .comment-section {
     display: flex;
     flex-direction: column;
-    gap: 1em
+    gap: 1em;
   }
 </style>
 
 <script>
-import { createGetCollection } from "astro/content/runtime"
 
-var commentsData = {
-  "currentUser": {
-    "image": { 
-      "png": "/avatars/image-juliusomo.png",
-      "webp": "/avatars/image-juliusomo.webp"
-    },
-    "username": "juliusomo"
-  },
-  "comments": [
-    {
-      "id": 1,
-      "content": "Impressive! Though it seems the drag feature could be improved. But overall it looks incredible. You've nailed the design and the responsiveness at various breakpoints works really well.",
-      "createdAt": "1 month ago",
-      "score": 12,
-      "user": {
-        "image": { 
-          "png": "/avatars/image-amyrobson.png",
-          "webp": "/avatars/image-amyrobson.webp"
-        },
-        "username": "amyrobson"
-      },
-      "replies": []
-    },
-    {
-      "id": 2,
-      "content": "Woah, your project looks awesome! How long have you been coding for? I'm still new, but think I want to dive into React as well soon. Perhaps you can give me an insight on where I can learn React? Thanks!",
-      "createdAt": "2 weeks ago",
-      "score": 5,
-      "user": {
-        "image": { 
-          "png": "/avatars/image-maxblagun.png",
-          "webp": "/avatars/image-maxblagun.webp"
-        },
-        "username": "maxblagun"
-      },
-      "replies": [
-        {
-          "id": 3,
-          "content": "If you're still new, I'd recommend focusing on the fundamentals of HTML, CSS, and JS before considering React. It's very tempting to jump ahead but lay a solid foundation first.",
-          "createdAt": "1 week ago",
-          "score": 4,
-          "replyingTo": "maxblagun",
-          "user": {
-            "image": { 
-              "png": "/avatars/image-ramsesmiron.png",
-              "webp": "/avatars/image-ramsesmiron.webp"
-            },
-            "username": "ramsesmiron"
-          }
-        },
-        {
-          "id": 4,
-          "content": "I couldn't agree more with this. Everything moves so fast and it always seems like everyone knows the newest library/framework. But the fundamentals are what stay constant.",
-          "createdAt": "2 days ago",
-          "score": 2,
-          "replyingTo": "ramsesmiron",
-          "user": {
-            "image": { 
-              "png": "/avatars/image-juliusomo.png",
-              "webp": "/avatars/image-juliusomo.webp"
-            },
-            "username": "juliusomo"
-          }
-        }
-      ]
+  import { currentUser, comments } from "../../data.json"
+
+  const commentTemplate = document.querySelector(".comment")
+  const commentSection = document.querySelector(".comment-section")
+  const commentBox = document.querySelector(".comment-box")
+  const replyBox = document.querySelector(".reply-section")
+  const deleteModal = document.querySelector(".delete-modal") as HTMLElement
+  const commentArea = document.querySelector(".comments")
+
+  const currentUserAvatar = currentUser.image.webp
+  const currentUsername = currentUser.username
+
+  let openForm = false
+
+  // Hide templates
+  commentTemplate.remove()
+  commentBox.remove()
+  replyBox.remove()
+  deleteModal.remove()
+
+  // ---- Append Comments ----
+
+  // Create comment
+  function appendComment(
+    newID, newScore, newAvatar, newUsername, newCreatedAt, newContent, appendTo
+  ) {
+    var comment = document.createElement("div")
+    comment.innerHTML = commentTemplate.outerHTML
+    const commentContent = comment.querySelector(".comment")
+    commentContent.id = newID
+    appendTo.appendChild(comment)
+
+    const score = commentContent.querySelector(".comment-score") as HTMLElement
+    score.textContent = newScore
+
+    const avatar = commentContent.querySelector(".avatar") as HTMLImageElement
+    avatar.src = newAvatar
+
+    const username = commentContent.querySelector(".username") as HTMLElement
+    username.textContent = newUsername
+
+    const createdAt = commentContent.querySelector(".created-at") as HTMLElement
+    createdAt.textContent = newCreatedAt
+
+    const content = commentContent.querySelector(".comment-content")
+    content.textContent = newContent
+
+    if (username.textContent == currentUser.username) {
+      commentContent.setAttribute("aria-details", "user-comment")
     }
-  ]
-}
 
-    const commentSection = document.querySelector(".comment-section")
-    const commentTemplate = document.querySelector(".comment")
-    const commentBox = document.querySelector(".comment-box")
-    const userCommentForm = document.querySelector(".comment-form")
-    const replies = document.querySelector(".reply-section")
-    const deleteModal = document.querySelector(".delete-modal-wrapper")
+    addInteractive(commentContent, score)
 
-    // Hide templates on HTML
-    commentTemplate.remove()
-    replies.remove()
-    commentBox.remove()
-    deleteModal.remove()
+    return commentContent
+  }
 
-    // Load comments
-    for (var id = 0; id < commentsData.comments.length; id++) {
-      const commentId = commentsData.comments[id].id
-      var newComment = document.createElement("div");
-      newComment.innerHTML = commentTemplate.outerHTML;
-      commentSection.appendChild(newComment);
+  // Create reply comment
+  function appendReplyArea(appendTo) {
+    var replies = document.createElement("div")
+    replies.innerHTML = replyBox.outerHTML
+    replies.classList.add("comment-replies")
+    const replyArea = replies.querySelector(".replies")
+    appendTo.appendChild(replies)
 
-      var replyInput = document.createElement("div")
-      replyInput.innerHTML = commentBox.outerHTML
-      replyInput.style.animation = "fadeIn 400ms forwards"
+    return replyArea
+  }
 
-      const newCommentWrapper = newComment.querySelector(".comment-wrapper") as HTMLElement
-      const newCommentContent = newComment.querySelector(".comment") as HTMLElement;
-      newCommentContent.id = commentId.toString();
+  function appendReply(
+    newID, newScore, newAvatar, newUsername, newCreatedAt, newContent, newReplyingTo, appendTo
+  ) {
+    const newReply = appendComment(
+      newID, newScore, newAvatar, newUsername, newCreatedAt, newContent, appendTo
+    )
+    newReply.setAttribute("aria-owns", "reply")
 
-      const replyForm = newCommentContent.querySelector(".reply-form") as HTMLElement
-    
-      const score = newCommentContent.querySelector(".comment-score")
-      score.textContent = commentsData.comments[id].score.toString()
+    const replyingTo = newReply.querySelector(".replying-to") as HTMLElement
+    replyingTo.textContent = "@" + newReplyingTo
+  }
 
-      const avatar = newCommentContent.querySelector<HTMLImageElement>(".avatar")
-      avatar.src = commentsData.comments[id].user.image.webp
+  // Create reply form
+  function appendReplyForm(commentToReply) {
+    var newReplyForm = document.createElement("div")
+    newReplyForm.innerHTML = commentBox.outerHTML
+    newReplyForm.classList.add("comment-reply-form")
+    newReplyForm.style.paddingTop = ".45em"
+    newReplyForm.style.animation = "slideDown 300ms forwards"
 
-      const username = newCommentContent.querySelector(".username")
-      username.textContent = commentsData.comments[id].user.username
+    const replyForm = commentToReply.querySelector(".reply-form")
+    replyForm.appendChild(newReplyForm)
 
-      const createdAt = newCommentContent.querySelector(".created-at")
-      createdAt.textContent = commentsData.comments[id].createdAt
+    let replyArea = commentToReply.querySelector(".comment-replies .replies")
 
-      const content = newCommentContent.querySelector(".comment-content")
-      content.textContent = commentsData.comments[id].content
+    const existingReplyArea = commentToReply.parentElement.parentElement.querySelector(".replies")
 
-      const replyBtn = newCommentContent.querySelector(".reply-btn")
-      replyBtn.addEventListener("click", () => {
-        replyForm.append(replyInput)
-        replyForm.style.paddingTop = ".45em"
-        var userFormAvatar = replyInput.querySelector(".user-avatar") as HTMLImageElement
-        userFormAvatar.src = commentsData.currentUser.image.webp
+    const replyAvatar = newReplyForm.querySelector(".user-avatar") as HTMLImageElement
+    replyAvatar.src = currentUserAvatar
 
-        const replySend = replyInput.querySelector(".send-btn")
-        replySend.addEventListener("click", () => {
-          const replyContent = replyInput.querySelector(".user-comment-input") as HTMLInputElement
-          if (replyContent.value != "") {
-            const reply = document.createElement("div")
-            reply.classList.add("replies")
-            reply.innerHTML = replies.outerHTML
-            newCommentWrapper.parentElement.appendChild(reply)
-            const repliesContent = reply.querySelector(".replies")
+    const buttonReply = newReplyForm.querySelector(".send-btn") as HTMLElement
+    buttonReply.textContent = "reply"
 
-            const newReplyComment = document.createElement("div")
-            newReplyComment.innerHTML = commentTemplate.outerHTML
+    const userReply = newReplyForm.querySelector(".user-comment-input") as HTMLInputElement
 
-            repliesContent.appendChild(newReplyComment)
-
-            const newReplyContent = newReplyComment.querySelector(".comment-wrapper") as HTMLElement
-
-            const score = newReplyContent.querySelector(".comment-score")
-
-            const avatar = newReplyContent.querySelector(".avatar") as HTMLImageElement
-            avatar.src = commentsData.currentUser.image.webp
-
-            const username = newReplyContent.querySelector(".username") as HTMLElement
-            username.textContent = commentsData.currentUser.username
-
-            const createdAt = newReplyContent.querySelector(".created-at")
-            createdAt.textContent = "A few seconds ago"
-
-            const replyingTo = newReplyContent.querySelector(".replying-to") as HTMLElement
-            replyingTo.textContent = "@" + newCommentContent.querySelector(".username").textContent
-
-            const content = newReplyContent.querySelector(".comment-content") as HTMLElement
-            content.textContent = replyContent.value
-
-            const iconDelete = newReplyComment.querySelector(".icon-delete")
-            iconDelete.addEventListener("click", () => {
-              newReplyComment.style.animation = "fadeOut 400ms forwards"
-              newReplyComment.addEventListener("animationend", () => {
-                newReplyComment.remove()
-              })
-            })
-
-            const iconEdit = newReplyComment.querySelector(".icon-edit")
-            iconEdit.addEventListener("click", () => {
-              const editInput = newReplyContent.querySelector(".edit-comment-form") as HTMLElement
-              const editComment = editInput.querySelector(".user-comment-input") as HTMLInputElement
-              editInput.style.display = "flex"
-              content.style.display = "none"
-              replyingTo.style.display = "none"
-              editComment.value = content.textContent 
-              const updateBtn = editInput.querySelector(".update-btn")
-              updateBtn.addEventListener("click", () => {
-                if (editComment.value != "") {
-                  content.textContent = editComment.value
-                  editInput.style.display = "none"
-                  content.style.display = "inline"
-                  replyingTo.style.display = "inline"
-                }
-              })
-            })
-
-            newReplyContent.setAttribute("aria-details", "user-comment")
-            newReplyContent.setAttribute("aria-owns", "reply")
-            replyInput.remove()
-            replyContent.value = ""
-          }
-        })
-      })
-
-      const increaseScore = newComment.querySelector(".increase-score")
-      increaseScore.addEventListener("click", () => {
-        score.textContent = (parseInt(score.textContent) + 1).toString()
-      })
-
-      const decreaseScore = newComment.querySelector(".decrease-score")
-      decreaseScore.addEventListener("click", () => {
-        if (score.textContent != "0") {
-          score.textContent = (parseInt(score.textContent) - 1).toString()
+    buttonReply.addEventListener("click", () => {
+      if (replyArea !== null) {
+        if (userReply.value != "") {
+          appendReply(
+            commentSection.querySelectorAll(".comment").length + 1,
+            "0",
+            currentUserAvatar,
+            currentUsername,
+            "Just now",
+            userReply.value,
+            commentToReply.querySelector(".username").textContent,
+            commentToReply.querySelector(".comment-replies .replies"),
+          )
+          newReplyForm.remove()
+          userReply.value = ""
+          openForm = false
         }
-      })
-
-      if (username.textContent == commentsData.currentUser.username) {
-        newCommentWrapper.setAttribute("aria-details", "user-comment")
-
-        const iconDelete = newComment.querySelector(".icon-delete")
-        iconDelete.addEventListener("click", () => {
-          newComment.style.animation = "fadeOut 400ms forwards"
-          newComment.addEventListener("animationend", () => {
-            newComment.remove()
-          })
-        })
-
-        const iconEdit = newComment.querySelector(".icon-edit")
-        iconEdit.addEventListener("click", () => {
-          console.log("Ícono de editar")
-        })
-      }
-
-      // Load replies
-      if (commentsData.comments[id].replies.length != 0) {
-        const reply = document.createElement("div")
-        reply.classList.add("replies")
-        reply.innerHTML = replies.outerHTML
-        newComment.append(reply)
-        const repliesContent = reply.querySelector(".replies")
-        for(var rp = 0; rp < commentsData.comments[id].replies.length; rp++) {
-          const replyId = commentsData.comments[id].replies[rp].id
-          const newComment = document.createElement("div")
-          newComment.innerHTML = commentTemplate.outerHTML;
-          repliesContent.appendChild(newComment);
-          const newCommentContent = newComment.querySelector(".comment-wrapper") as HTMLElement;
-          newCommentContent.id = replyId.toString();
-          const replyForm = newComment.querySelector(".reply-form") as HTMLElement
-
-          const score = newCommentContent.querySelector(".comment-score")
-          score.textContent = commentsData.comments[id].replies[rp].score.toString()
-
-          const avatar = newCommentContent.querySelector<HTMLImageElement>(".avatar")
-          avatar.src = commentsData.comments[id].replies[rp].user.image.webp
-
-          const username = newCommentContent.querySelector(".username")
-          username.textContent = commentsData.comments[id].replies[rp].user.username
-
-          const createdAt = newCommentContent.querySelector(".created-at")
-          createdAt.textContent = commentsData.comments[id].replies[rp].createdAt
-
-          const replyingTo = newCommentContent.querySelector(".replying-to") as HTMLElement
-          replyingTo.textContent = "@" + commentsData.comments[id].replies[rp].replyingTo
-
-          const content = newCommentContent.querySelector(".comment-content") as HTMLElement
-          content.textContent = commentsData.comments[id].replies[rp].content
-          
-          const replyBtn = newCommentContent.querySelector(".reply-btn")
-          replyBtn.addEventListener("click", () => {
-            newComment.append(replyInput)
-            replyForm.style.paddingTop = ".45em"
-            var userFormAvatar = replyInput.querySelector(".user-avatar") as HTMLImageElement
-            userFormAvatar.src = commentsData.currentUser.image.webp
-
-            const replyContent = replyInput.querySelector(".user-comment-input") as HTMLTextAreaElement
-
-            const replySend = replyInput.querySelector(".send-btn")
-            replySend.addEventListener("click", () => {
-              if (replyContent.value != "") {
-                var newReply = document.createElement("div")
-                newReply.innerHTML = commentTemplate.outerHTML
-                newReply.style.animation = "fadeIn 400ms forwards"
-                repliesContent.appendChild(newReply)
-
-                const newReplyContent = newReply.querySelector(".comment-wrapper")
-
-                newReplyContent.setAttribute("aria-details", "user-comment")
-                newReplyContent.setAttribute("aria-owns", "reply")
-
-                const score = newReplyContent.querySelector(".comment-score")
-
-                const avatar = newReplyContent.querySelector<HTMLImageElement>(".avatar")
-                avatar.src = commentsData.currentUser.image.webp
-
-                const username = newReplyContent.querySelector(".username")
-                username.textContent = commentsData.currentUser.username
-
-                const createdAt = newReplyContent.querySelector(".created-at")
-                createdAt.textContent = "A few seconds ago"
-
-                const replyingTo = newReplyContent.querySelector(".replying-to") as HTMLElement
-                replyingTo.textContent = "@" + newComment.querySelector(".username").textContent
-
-                const content = newReplyContent.querySelector(".comment-content") as HTMLElement
-                content.textContent = replyContent.value
-
-                const iconDelete = newReplyContent.querySelector(".icon-delete")
-                iconDelete.addEventListener("click", () => {
-                  newReply.style.animation = "fadeOut 400ms forwards"
-                  newReply.addEventListener("animationend", () => {
-                    newReply.remove()
-                  })
-                })
-
-                const iconEdit = newReplyContent.querySelector(".icon-edit")
-                iconEdit.addEventListener("click", () => {
-                  const editInput = newReplyContent.querySelector(".edit-comment-form") as HTMLElement
-                  const editComment = editInput.querySelector(".user-comment-input") as HTMLInputElement
-                  editInput.style.display = "flex"
-                  content.style.display = "none"
-                  replyingTo.style.display = "none"
-                  editComment.value = content.textContent
-
-                  const updateBtn = editInput.querySelector(".update-btn")
-                  updateBtn.addEventListener("click", () => {
-                    if (editComment.value != "") {
-                      content.textContent = editComment.value
-                      editInput.style.display = "none"
-                      content.style.display = "inline"
-                      replyingTo.style.display = "inline"
-                    }
-                  })
-                })
-
-                replyInput.remove()
-
-                replyContent.value = ""
-            }
-            })
-          })
-
-
-          const increaseScore = newComment.querySelector(".increase-score")
-          increaseScore.addEventListener("click", () => {
-            score.textContent = (parseInt(score.textContent) + 1).toString()
-          })
-
-          const decreaseScore = newComment.querySelector(".decrease-score")
-          decreaseScore.addEventListener("click", () => {
-            if (score.textContent != "0") {
-              score.textContent = (parseInt(score.textContent) - 1).toString()
-            }
-          })
-
-          newCommentContent.setAttribute("aria-owns", "reply")
-          if (username.textContent == commentsData.currentUser.username) {
-            newCommentContent.setAttribute("aria-details", "user-comment")
-
-            const iconDelete = newComment.querySelector(".icon-delete")
-            iconDelete.addEventListener("click", () => {
-              newComment.style.animation = "fadeOut 400ms forwards"
-              newComment.addEventListener("animationend", () => {
-                newComment.remove()
-              })
-            })
-
-            const iconEdit = newComment.querySelector(".icon-edit")
-            iconEdit.addEventListener("click", () => {
-              const editInput = newCommentContent.querySelector(".edit-comment-form") as HTMLElement
-              const editComment = editInput.querySelector(".user-comment-input") as HTMLInputElement
-              editInput.style.display = "flex"
-              content.style.display = "none"
-              replyingTo.style.display = "none"
-              editComment.value = content.textContent
-
-              const updateBtn = editInput.querySelector(".update-btn")
-              updateBtn.addEventListener("click", () => {
-                if (editComment.value != "") {
-                  content.textContent = editComment.value
-                  editInput.style.display = "none"
-                  content.style.display = "inline"
-                  replyingTo.style.display = "inline"
-                }
-              })
-            })
+      } else {
+        if (userReply.value != "" && existingReplyArea != null) {
+          const newReplyArea = appendReplyArea(commentToReply)
+          appendReply(
+          commentSection.querySelectorAll(".comment").length + 1,
+            "0",
+            currentUserAvatar,
+            currentUsername,
+            "Just now",
+            userReply.value,
+            commentToReply.querySelector(".username").textContent,
+            newReplyArea,
+          )
+          newReplyForm.remove()
+          userReply.value = ""
+          replyArea = "not null"
+          openForm = false
+        } else {
+          if (userReply.value != "") {
+            appendReply(
+              commentSection.querySelectorAll(".comment").length + 1,
+              "0",
+              currentUserAvatar,
+              currentUsername,
+              "Just now",
+              userReply.value,
+              commentToReply.querySelector(".username").textContent,
+              commentToReply.parentElement.parentElement,
+            )
+            newReplyForm.remove()
+            userReply.value = ""
+            openForm = false
           }
         }
       }
 
-    }
+    })
+  }
 
-    // User commentbox
-    var userCommentBox = document.createElement("div")
-    userCommentBox.innerHTML = commentBox.outerHTML
+  // Remove all reply forms
+  function removeReplyForms() {
+    document.querySelectorAll<HTMLElement>(".comment-reply-form").forEach(form => {
+      form.style.animation = "slideUp 200ms forwards"
+      form.addEventListener("animationend", () => {
+        form.remove()
+      })
+    })
+  }
 
-    userCommentForm.appendChild(userCommentBox)
-    const userAvatar = userCommentBox.querySelector(".user-avatar") as HTMLImageElement
-    const commentInput = userCommentBox.querySelector<HTMLTextAreaElement>(".user-comment-input")
-    const sendBtn = userCommentBox.querySelector(".send-btn")
+  // Interactive comments
+  function addInteractive(newComment, currentScore) {
+    const increaseScore = newComment.querySelector(".increase-score")
+    increaseScore.addEventListener("click", () => {
+      currentScore.textContent = (parseInt(currentScore.textContent) + 1).toString()
+    })
 
-    userAvatar.src = commentsData.currentUser.image.webp
-
-    sendBtn.addEventListener("click", () => {
-      var userCommentInput = commentInput
-
-      if (userCommentInput.value != "") {
-        var newComment = document.createElement("div");
-        newComment.innerHTML = commentTemplate.outerHTML;
-        commentSection.appendChild(newComment);
-        const newCommentContent = newComment.querySelector(".comment-wrapper") as HTMLElement;
-        newCommentContent.id = id.toString();
-  
-        const score = newCommentContent.querySelector(".comment-score")
-  
-        const avatar = newCommentContent.querySelector<HTMLImageElement>(".avatar")
-        avatar.src = commentsData.currentUser.image.webp
-  
-        const username = newCommentContent.querySelector(".username")
-        username.textContent = commentsData.currentUser.username
-  
-        const createdAt = newCommentContent.querySelector(".created-at")
-        createdAt.textContent = "A few seconds ago"
-  
-        const content = newCommentContent.querySelector(".comment-content") as HTMLElement
-        content.textContent = userCommentInput.value
-  
-        const increaseScore = newComment.querySelector(".increase-score")
-        increaseScore.addEventListener("click", () => {
-          score.textContent = (parseInt(score.textContent) + 1).toString()
-        })
-  
-        const decreaseScore = newComment.querySelector(".decrease-score")
-        decreaseScore.addEventListener("click", () => {
-          if (score.textContent != "0") {
-            score.textContent = (parseInt(score.textContent) - 1).toString()
-          }
-        })
-
-        const iconDelete = newComment.querySelector(".icon-delete")
-        iconDelete.addEventListener("click", () => {
-          newComment.style.animation = "fadeOut 400ms forwards"
-          newComment.addEventListener("animationend", () => {
-            newComment.remove()
-          })
-        })
-
-        const iconEdit = newComment.querySelector(".icon-edit")
-        iconEdit.addEventListener("click", () => {
-          const editInput = newCommentContent.querySelector(".edit-comment-form") as HTMLElement
-          const editComment = editInput.querySelector(".user-comment-input") as HTMLInputElement
-          editInput.style.display = "flex"
-          content.style.display = "none"
-          editComment.value = content.textContent
-
-          const updateBtn = editInput.querySelector(".update-btn")
-          updateBtn.addEventListener("click", () => {
-            if (editComment.value != "") {
-              content.textContent = editComment.value
-              editInput.style.display = "none"
-              content.style.display = "inline"
-            }
-          })
-        })
-  
-        newCommentContent.setAttribute("aria-details", "user-comment")
-
-        userCommentInput.value = ""
+    const decreaseScore = newComment.querySelector(".decrease-score")
+    decreaseScore.addEventListener("click", () => {
+      if (currentScore.textContent != "0") {
+        currentScore.textContent = (parseInt(currentScore.textContent) - 1).toString()
       }
     })
+
+    if (newComment.hasAttribute("aria-details", "user-comment")) {
+      const repliesArea = newComment.parentElement.parentElement
+      const iconDelete = newComment.querySelector(".icon-delete")
+      iconDelete.addEventListener("click", () => {
+        var newDeleteModal = document.createElement("div")
+        newDeleteModal.innerHTML = deleteModal.outerHTML
+        commentArea.appendChild(newDeleteModal)
+
+        const deleteModalContent = newDeleteModal.querySelector(".delete-modal") as HTMLElement
+        deleteModalContent.style.display = "flex"
+
+        const buttonCancel = deleteModalContent.querySelector(".button-cancel")
+        buttonCancel.addEventListener("click", () => {
+          deleteModalContent.setAttribute("closing", "")
+          deleteModalContent.addEventListener("animationend", () => {
+            newDeleteModal.remove()
+          })
+        })
+
+        const buttonDelete = deleteModalContent.querySelector(".button-delete")
+        buttonDelete.addEventListener("click", () => {
+          deleteModalContent.setAttribute("closing", "")
+          deleteModalContent.addEventListener("animationend", () => {
+            newDeleteModal.remove()
+          })
+          newComment.setAttribute("deleting", "")
+          newComment.addEventListener("animationend", () => {
+            newComment.parentElement.remove()
+          })
+          if (repliesArea.querySelectorAll(".comment").length == 1) {
+            repliesArea.parentElement.style.animation = "slideRight 400ms forwards"
+            repliesArea.parentElement.addEventListener("animationend", () => {
+              repliesArea.parentElement.remove()
+            })
+          }
+        })
+      })
+
+      const iconEdit = newComment.querySelector(".icon-edit")
+      iconEdit.addEventListener("click", () => {
+        const commentReplyTo = newComment.querySelector(".replying-to") as HTMLElement
+        const commentContent = newComment.querySelector(".comment-content") as HTMLElement
+        const editComment = newComment.querySelector(".edit-comment-form") as HTMLElement
+
+        commentReplyTo.style.display = "none"
+        commentContent.style.display = "none"
+
+        editComment.style.animation = "slideFromDown 300ms forwards"
+        editComment.style.display = "flex"
+
+        const editInput = editComment.querySelector(".user-comment-input") as HTMLInputElement
+        editInput.value = commentContent.textContent
+
+        const updateBtn = editComment.querySelector(".update-btn")
+        updateBtn.addEventListener("click", () => {
+          commentContent.textContent = editInput.value
+          commentReplyTo.style.display = "inline"
+          commentReplyTo.style.animation = "loading 700ms forwards"
+          commentContent.style.display = "inline"
+          commentContent.style.animation = "loading 700ms forwards"
+          editComment.style.display = "none"
+        })
+      })
+    } else {
+      const replyBtn = newComment.querySelector(".reply-btn")
+
+      replyBtn.addEventListener("click", () => {
+        if (openForm == false) {
+          appendReplyForm(newComment)
+          openForm = true
+        } else {
+        }
+
+        document.addEventListener("keydown", (event) => {
+          if (event.keyCode === 27) {
+            removeReplyForms()
+            openForm = false
+          }
+        });
+
+      });
+
+    }
+  }
+
+  // Load comments
+  for (let id = 0; id < comments.length; id++) {
+    const newComment = appendComment(
+      comments[id].id,
+      comments[id].score,
+      comments[id].user.image.webp,
+      comments[id].user.username,
+      comments[id].createdAt,
+      comments[id].content,
+      commentSection
+    )
+
+    // Load replies for each comment
+    if (comments[id].replies.length != 0) {
+      const replyArea = appendReplyArea(newComment)
+
+      for (let rp = 0; rp < comments[id].replies.length; rp++) {
+        appendReply(
+          comments[id].replies[rp].id,
+          comments[id].replies[rp].score,
+          comments[id].replies[rp].user.image.webp,
+          comments[id].replies[rp].user.username,
+          comments[id].replies[rp].createdAt,
+          comments[id].replies[rp].content,
+          comments[id].replies[rp].replyingTo,
+          replyArea,
+        )
+      }
+    }
+  }
+
+  // Add commentBox
+  commentArea.appendChild(commentBox)
+
+  const userAvatar = commentBox.querySelector(".user-avatar") as HTMLImageElement
+  userAvatar.src = currentUserAvatar
+
+  const commentInput = commentBox.querySelector(".user-comment-input") as HTMLInputElement
+
+  const sendBtn = commentBox.querySelector(".send-btn")
+  sendBtn.addEventListener("click", () => {
+    if (commentInput.value != "") {
+      appendComment(
+        commentSection.querySelectorAll(".comment").length + 1,
+        "0",
+        currentUserAvatar,
+        currentUsername,
+        "Just now",
+        commentInput.value,
+        commentSection
+      )
+    }
+    commentInput.value = ""
+  })
+
 </script>

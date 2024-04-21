@@ -1,5 +1,5 @@
 <section class="reply-section">
-  <hr>
+  <hr class="comment-divisor">
 
   <div class="replies flow">
   </div>
@@ -8,12 +8,17 @@
 
 <style>
   .reply-section {
-    position: relative;
     padding-top: 1em;
+    position: relative;
     padding-left: 2.5rem;
     display: flex;
     gap: 2em;
   }
+
+  .comment-divisor {
+    animation: slideDown 400ms forwards
+  }
+
 
   .replies {
     width: 100%;
