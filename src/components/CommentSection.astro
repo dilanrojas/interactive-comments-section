@@ -40,7 +40,7 @@ import DeleteModal from './DeleteModal.astro';
 
   const commentTemplate = document.querySelector(".comment")
   const commentSection = document.querySelector(".comment-section")
-  const commentBox = document.querySelector(".comment-box")
+  const commentBox = document.querySelector(".comment-box") as HTMLElement
   const replyBox = document.querySelector(".reply-section")
   const deleteModal = document.querySelector(".delete-modal") as HTMLElement
   const commentArea = document.querySelector(".comments")
@@ -137,6 +137,7 @@ import DeleteModal from './DeleteModal.astro';
     buttonReply.textContent = "reply"
 
     const userReply = newReplyForm.querySelector(".user-comment-input") as HTMLInputElement
+    userReply.focus()
 
     buttonReply.addEventListener("click", () => {
       if (replyArea !== null) {
@@ -338,7 +339,8 @@ import DeleteModal from './DeleteModal.astro';
 
   // Add commentBox
   commentArea.appendChild(commentBox)
-
+  commentBox.style.animation = "slideLeft 300ms forwards"
+  
   const userAvatar = commentBox.querySelector(".user-avatar") as HTMLImageElement
   userAvatar.src = currentUserAvatar
 
